@@ -27,10 +27,6 @@ on:
         description: 'Custom configuration file path (optional)'
         required: false
         type: string
-      notify_on_completion:
-        description: 'Create issue with results'
-        default: true
-        type: boolean
 
 jobs:
   analyze-repository:
@@ -42,5 +38,4 @@ jobs:
       config_file: ${{ inputs.custom_config }}
       analysis_depth: ${{ inputs.analysis_depth }}
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
