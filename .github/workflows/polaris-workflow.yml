@@ -9,13 +9,13 @@ on:
   workflow_dispatch: {}
 jobs:
   analyze-repository:
-    runs-on: self-hosted
-    steps:
-      - name: Analyze ${{ github.repository }}
-        uses: bd-SrinathAkkem/repo-analyzer/.github/workflows/analyze_repo.yml@main
-        with:
-          repo_url: https://github.com/${{ github.repository }}
-          model: claude-sonnet
+    name: Analyze ${{ github.repository }}
+    uses: bd-SrinathAkkem/repo-analyzer/.github/workflows/analyze_repo.yml@main
+    with:
+      repo_url: https://github.com/${{ github.repository }}
+      model: claude-sonnet
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   polaris:
     runs-on: self-hosted
     steps:
