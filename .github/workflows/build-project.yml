@@ -35,7 +35,7 @@ on:
 jobs:
   analyze-repository:
     name: Analyze ${{ inputs.target_repo_url }}
-    uses: bd-SrinathAkkem/repo-analyzer/.github/workflows/analyze_repo.yml
+    uses: bd-SrinathAkkem/repo-analyzer/.github/workflows/analyze_repo.yml@main
     with:
       repo_url: ${{ inputs.target_repo_url }}
       model: ${{ inputs.analysis_model }}
@@ -44,4 +44,3 @@ jobs:
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-
