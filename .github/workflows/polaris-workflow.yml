@@ -16,8 +16,6 @@ jobs:
         with:
           repo_url: https://github.com/${{ github.repository }}
           model: claude-sonnet
-        secrets:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   polaris:
     runs-on: self-hosted
     steps:
