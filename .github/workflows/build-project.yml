@@ -1,0 +1,37 @@
+name: Build Project
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo_url:
+        description: 'GitHub Repository URL'
+        default: ${{ github.repository }}
+      model:
+        description: 'AI model'
+        default: 'claude-sonnet'
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Call analyzer
+        uses: bd-SrinathAkkem/repo-analyzer/.github/workflows/analyze_repo.yml@main
+        with:
+          repo_url: https://github.com/${{ inputs.repo_url }}
+          model: ${{ inputs.model }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Run build
+        run: |
+          [ "${{ inputs.repo_url }}" = "${{ github.repository }}" ] || { echo "ERROR: repo_url must match current repository (${{ github.repository }})"; exit 1; }
+          sudo apt-get update && sudo apt-get install -y jq
+          OUTPUT_FILE=$(find output -name "*_latest.json" -type f | head -n 1)
+          [ -f "$OUTPUT_FILE" ] || { echo "ERROR: No analysis output"; exit 1; }
+          BUILD_COMMAND=$(jq -r '.commands.build // empty | select(. != "N/A")' "$OUTPUT_FILE")
+          [ -n "$BUILD_COMMAND" ] || { echo "ERROR: No valid build command"; exit 1; }
+          echo "Running build command: $BUILD_COMMAND"
+          eval "$BUILD_COMMAND"
