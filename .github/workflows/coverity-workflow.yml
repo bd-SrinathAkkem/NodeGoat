@@ -22,9 +22,9 @@ jobs:
           coverity_stream_name: ${{ github.event.repository.name }}-${{ github.ref_name }}
           coverity_policy_view: 'Outstanding Issues'
  
-          ### PULL REQUEST COMMENTS:
-          #coverity_prComment_enabled: true
-          #coverity_prComment_impacts: 'High'
+          ## PULL REQUEST COMMENTS:
+          coverity_prComment_enabled: true
+          coverity_prComment_impacts: 'High'
           bridgecli_download_url: "https://artifactory.tools.duckutil.net/artifactory/clops-local/integrations/bridge/binaries/bridge-cli-bundle/latest/bridge-cli-bundle-macos_arm.zip"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           mark_build_status: 'success'
