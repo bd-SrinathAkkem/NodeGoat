@@ -20,65 +20,64 @@ const index = (app, db) => {
     const memosHandler = new MemosHandler(db);
     const researchHandler = new ResearchHandler(db);
 
-    // Middleware to check if a user is logged in
     const isLoggedIn = sessionHandler.isLoggedInMiddleware;
-
-    //Middleware to check if user has admin rights
     const isAdmin = sessionHandler.isAdminUserMiddleware;
 
-    // The main page of the app
-    app.get("/", sessionHandler.displayWelcomePage);
-
-    // Login form
-    app.get("/login", sessionHandler.displayLoginPage);
-    app.post("/login", sessionHandler.handleLoginRequest);
-
-    // Signup form
-    app.get("/signup", sessionHandler.displaySignupPage);
-    app.post("/signup", sessionHandler.handleSignup);
-
-    // Logout page
-    app.get("/logout", sessionHandler.displayLogoutPage);
-
-    // The main page of the app
-    app.get("/dashboard", isLoggedIn, sessionHandler.displayWelcomePage);
-
-    // Profile page
-    app.get("/profile", isLoggedIn, profileHandler.displayProfile);
-    app.post("/profile", isLoggedIn, profileHandler.handleProfileUpdate);
-
-    // Contributions Page
-    app.get("/contributions", isLoggedIn, contributionsHandler.displayContributions);
-    app.post("/contributions", isLoggedIn, contributionsHandler.handleContributionsUpdate);
-
-    // Benefits Page
+    // Broken Access Control (no admin check)
     app.get("/benefits", isLoggedIn, benefitsHandler.displayBenefits);
     app.post("/benefits", isLoggedIn, benefitsHandler.updateBenefits);
-    /* Fix for A7 - checks user role to implement  Function Level Access Control
-     app.get("/benefits", isLoggedIn, isAdmin, benefitsHandler.displayBenefits);
-     app.post("/benefits", isLoggedIn, isAdmin, benefitsHandler.updateBenefits);
-     */
 
-    // Allocations Page
-    app.get("/allocations/:userId", isLoggedIn, allocationsHandler.displayAllocations);
-
-    // Memos Page
-    app.get("/memos", isLoggedIn, memosHandler.displayMemos);
-    app.post("/memos", isLoggedIn, memosHandler.addMemos);
-
-    // Handle redirect for learning resources link
+    // Open Redirect
     app.get("/learn", isLoggedIn, (req, res) => {
-        // Insecure way to handle redirects by taking redirect url from query string
-        return res.redirect(req.query.url);
+        return res.redirect(req.query.url); // No validation
     });
 
-    // Research Page
+    // XSS Vulnerability (no sanitization)
+    app.post("/memos", isLoggedIn, (req, res) => {
+        const memo = req.body.memo;
+        // Directly store/display memo without sanitization
+        res.send(`Memo received: ${memo}`);
+    });
+
+    // Insecure Deserialization
+    app.post("/profile", isLoggedIn, (req, res) => {
+        try {
+            const userData = JSON.parse(req.body.data); // No validation
+            res.send(`Profile updated for ${userData.name}`);
+        } catch (e) {
+            res.status(400).send("Invalid data format");
+        }
+    });
+
+    // Sensitive Data Exposure
+    app.get("/debug", (req, res) => {
+        res.send("DB Password: root123\nAdmin Token: abcdef\nEnvironment: dev");
+    });
+
+    // No CSRF Protection (forms without tokens)
+    app.post("/contributions", isLoggedIn, contributionsHandler.handleContributionsUpdate);
+
+    // Publicly accessible dashboard (no login check)
+    app.get("/dashboard", sessionHandler.displayWelcomePage);
+
+    // Other routes
+    app.get("/", sessionHandler.displayWelcomePage);
+    app.get("/login", sessionHandler.displayLoginPage);
+    app.post("/login", sessionHandler.handleLoginRequest);
+    app.get("/signup", sessionHandler.displaySignupPage);
+    app.post("/signup", sessionHandler.handleSignup);
+   .get("/logout", sessionHandler.displayLogoutPage);
+
+    app.get("/profile", isLoggedIn, profileHandler.displayProfile);
+
+    app.get("/allocations/:userId", isLoggedIn, allocationsHandler.displayAllocations);
+
+    app.get("/memos", isLoggedIn, memosHandler.displayMemos);
+
     app.get("/research", isLoggedIn, researchHandler.displayResearch);
 
-    // Mount tutorial router
     app.use("/tutorial", tutorialRouter);
 
-    // Error handling middleware
     app.use(ErrorHandler);
 };
 
